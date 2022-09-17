@@ -1,0 +1,76 @@
+module vendingMachine(clock, reset, cash_in, purchase, present_state, next_state, cash_return);
+	input clock, reset;
+	input [1:0] cash_in; //01 = 5Tk, 10 = 10Tk, 11 = 20Tk
+	output reg purchase;
+	output reg [1:0] cash_return, present_state, next_state;
+	parameter state0 = 2'b00,//Final State and also 0TK State.
+			  state1 = 2'b01, //5TK State
+		      n = 10; //The amount for which a product can be purchased, in this case 10TK
+	
+	always@(posedge clock)
+	begin
+		if(n == 10)
+		begin
+			if(reset == 1)
+			begin
+				present_state = 0;
+				next_state = 0;
+			end
+			else
+			begin
+				present_state = next_state;
+				case(present_state)
+				state0: if(cash_in == 2'b00)
+							begin
+								next_state = state0;
+								purchase = 0;
+								cash_return = 0;
+							end
+						else if(cash_in == 2'b01)
+							begin
+								next_state = state1;
+								purchase = 0;
+								cash_return = 0;
+							end
+						else if(cash_in == 2'b10)
+							begin
+								next_state = state0;
+								purchase = 1;
+								cash_return = 0;
+							end	
+						else if(cash_in == 2'b11)
+							begin
+								next_state = state0;
+								purchase = 1;
+								cash_return = 2'b10;
+							end		
+				
+				state1: if(cash_in == 2'b00)
+							begin
+								next_state = state0;
+								purchase = 0;
+								cash_return = 2'b01;
+							end
+						else if(cash_in == 2'b01)
+							begin
+								next_state = state0;
+								purchase = 1;
+								cash_return = 0;
+							end
+						else if(cash_in == 2'b10)
+							begin
+								next_state = state0;
+								purchase = 1;
+								cash_return = 2'b01;
+							end	
+						else if(cash_in == 2'b11)
+							begin
+								next_state = state0;
+								purchase = 1;
+								cash_return = 2'b11;
+							end		
+				endcase
+			end
+		end
+	end	
+endmodule
